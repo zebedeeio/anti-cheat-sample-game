@@ -1,0 +1,17 @@
+﻿<Properties StartupConfiguration="{5F282BE9-2EF7-57A8-704A-7AE72E40BF2D}|">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/GameManager.cs">
+    <Files>
+      <File FileName="Assets/Scripts/GameManager.cs" Line="60" Column="13" />
+      <File FileName="Assets/Scripts/PlayFabManager.cs" Line="254" Column="25" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="fdc58724-4a80-4e1d-b2f3-fc77c282d7f4" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/souleimagara/Documents/projects/ZEBEDEE/Unity Projects/GITLAB/Flappy Sats/Assets/Scripts/PlayFabManager.cs" relfile="Assets/Scripts/PlayFabManager.cs" line="326" column="9" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
