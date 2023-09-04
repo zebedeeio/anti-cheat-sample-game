@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
     public GameObject playButton;
     public GameObject gameOver;
     public GameObject HighScore;
+
+    private string key = "n4hKhuwYmvaiVQFs9VEwzq/n/JJ2Re1MZlDqziqt3BE=.hX26teFMi8zB88oaAOg8lZ/Izy8Om8XvwVfuYLOBSEU=";
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -27,6 +29,29 @@ public class GameManager : MonoBehaviour
         }
         Application.targetFrameRate = 60;
         Pause();
+
+        // string key = SimpleAES.GenerateEncryptionKeys();
+        //Debug.Log("put the key in the key varible above and on the server\n" + key);
+
+
+    }
+
+    public string CreateProof()
+    {
+
+
+        SimpleAES encryptor = new SimpleAES();
+
+        string randomNonce = "hello";// System.Guid.NewGuid().ToString();
+
+        string iv = SimpleAES.GenerateEncryptionVector();
+
+        string encrypted = encryptor.Encrypt(randomNonce, key, iv);
+
+        string payload = encrypted + "." + iv;
+
+        return payload;
+
     }
 
     [SkipRename]
@@ -47,6 +72,8 @@ public class GameManager : MonoBehaviour
         {
             Destroy(pipes[i].gameObject);
         }
+
+
     }
 
     public void GameOver()

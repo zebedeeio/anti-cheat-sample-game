@@ -143,11 +143,12 @@ public class PlayFabManager : MonoBehaviour
     // Update the player score statistic in PlayFab
     private void UpdatePlayerScore()
     {
-
+        string proof = GameManager.Instance.CreateProof();
         var request = new ExecuteCloudScriptRequest
         {
             FunctionName = "updateAndRetrieveScore",
-            GeneratePlayStreamEvent = true
+            GeneratePlayStreamEvent = true,
+            FunctionParameter = new { payload = proof }
         };
 
         PlayFabClientAPI.ExecuteCloudScript(request, OnCloudScriptExecuted, OnCloudScriptError);
@@ -169,7 +170,14 @@ public class PlayFabManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Invalid score value received from Cloud Script");
+                if (response != null && response.ContainsKey("message"))
+                {
+                    Debug.Log(response["message"]);
+                }
+                else
+                {
+                    Debug.LogError("Invalid score value received from Cloud Script");
+                }
             }
         }
         else
