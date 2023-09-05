@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
 
         SimpleAES encryptor = new SimpleAES();
 
-        string randomNonce = "hello";// System.Guid.NewGuid().ToString();
+        string randomNonce = System.Guid.NewGuid().ToString();
 
         string iv = SimpleAES.GenerateEncryptionVector();
 
