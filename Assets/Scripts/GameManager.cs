@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameOver;
     public GameObject HighScore;
 
-    private string key = "n4hKhuwYmvaiVQFs9VEwzq/n/JJ2Re1MZlDqziqt3BE=.hX26teFMi8zB88oaAOg8lZ/Izy8Om8XvwVfuYLOBSEU=";
+    private string key = "foDInDdhnrOHdR3hqHq0VpXQx3TseqBW92qudWOqY7s=.KppBTEAIEijkfugnAe/5H1LsyXIKiiH55ABqVU7kCuY=";
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
         Pause();
 
         // string key = SimpleAES.GenerateEncryptionKeys();
-        //Debug.Log("put the key in the key varible above and on the server\n" + key);
+        // Debug.Log("put the key in the key varible above and on the server\n" + key);
 
 
     }
@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
 
         SimpleAES encryptor = new SimpleAES();
 
-        string randomNonce = "hello";// System.Guid.NewGuid().ToString();
+        string randomNonce = System.Guid.NewGuid().ToString();
 
         string iv = SimpleAES.GenerateEncryptionVector();
 
