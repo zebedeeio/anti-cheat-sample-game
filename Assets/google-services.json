@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "697139012276",
+    "project_id": "flappysats-ec2c0",
+    "storage_bucket": "flappysats-ec2c0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697139012276:android:d7d7fef7a31a0cbefd6de1",
+        "android_client_info": {
+          "package_name": "com.zebedee.flappysats"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "697139012276-o8cbkda6rap1ps5bbdoeipb3rfmck49i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjsbW0eRJD6HVK59aFkyH8qRo08Re34VE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "697139012276-o8cbkda6rap1ps5bbdoeipb3rfmck49i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

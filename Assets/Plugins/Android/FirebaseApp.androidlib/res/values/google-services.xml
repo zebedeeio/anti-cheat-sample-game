@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id">
+  <string name="gcm_defaultSenderId" translatable="false">697139012276</string>
+  <string name="google_storage_bucket" translatable="false">flappysats-ec2c0.appspot.com</string>
+  <string name="project_id" translatable="false">flappysats-ec2c0</string>
+  <string name="google_api_key" translatable="false">AIzaSyAjsbW0eRJD6HVK59aFkyH8qRo08Re34VE</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAjsbW0eRJD6HVK59aFkyH8qRo08Re34VE</string>
+  <string name="google_app_id" translatable="false">1:697139012276:android:d7d7fef7a31a0cbefd6de1</string>
+  <string name="default_web_client_id" translatable="false">697139012276-o8cbkda6rap1ps5bbdoeipb3rfmck49i.apps.googleusercontent.com</string>
+</resources>

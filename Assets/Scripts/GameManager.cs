@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameOver;
     public GameObject HighScore;
 
+    //more secure to split this key and store it in several places
     private string key = "n4hKhuwYmvaiVQFs9VEwzq/n/JJ2Re1MZlDqziqt3BE=.hX26teFMi8zB88oaAOg8lZ/Izy8Om8XvwVfuYLOBSEU=";
     private void Awake()
     {

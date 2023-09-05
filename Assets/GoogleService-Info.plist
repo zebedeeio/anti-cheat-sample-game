@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>697139012276-i8nosfp4doao41bhoh4ootlklmldlgpj.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.697139012276-i8nosfp4doao41bhoh4ootlklmldlgpj</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDAYzu7gbGH_qga_xi5hoWM289iHAJXb2U</string>
+	<key>GCM_SENDER_ID</key>
+	<string>697139012276</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.zebedee.flappysats</string>
+	<key>PROJECT_ID</key>
+	<string>flappysats-ec2c0</string>
+	<key>STORAGE_BUCKET</key>
+	<string>flappysats-ec2c0.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:697139012276:ios:4275e5e02beb919efd6de1</string>
+</dict>
+</plist>

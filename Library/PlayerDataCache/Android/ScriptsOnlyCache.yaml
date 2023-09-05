@@ -98,39 +98,39 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 16580}
+      Script: {instanceID: 1756}
     - Class: 114
-      Script: {instanceID: 17670}
+      Script: {instanceID: 2868}
     - Class: 114
-      Script: {instanceID: 17906}
+      Script: {instanceID: 3120}
     - Class: 114
-      Script: {instanceID: 17954}
+      Script: {instanceID: 3170}
     - Class: 114
-      Script: {instanceID: 18042}
+      Script: {instanceID: 3264}
     - Class: 114
-      Script: {instanceID: 18224}
+      Script: {instanceID: 3458}
     - Class: 114
-      Script: {instanceID: 18258}
+      Script: {instanceID: 3494}
     - Class: 114
-      Script: {instanceID: 18904}
+      Script: {instanceID: 4160}
     - Class: 114
-      Script: {instanceID: 19370}
+      Script: {instanceID: 4636}
     - Class: 114
-      Script: {instanceID: 19528}
+      Script: {instanceID: 4798}
     - Class: 114
-      Script: {instanceID: 19860}
+      Script: {instanceID: 5136}
     - Class: 114
-      Script: {instanceID: 20696}
+      Script: {instanceID: 5984}
     - Class: 114
-      Script: {instanceID: 21034}
+      Script: {instanceID: 6328}
     - Class: 114
-      Script: {instanceID: 21148}
+      Script: {instanceID: 6442}
     - Class: 114
-      Script: {instanceID: 21556}
+      Script: {instanceID: 6864}
     - Class: 114
-      Script: {instanceID: 21930}
+      Script: {instanceID: 7260}
     - Class: 114
-      Script: {instanceID: 21980}
+      Script: {instanceID: 7310}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -730,7 +730,7 @@ ScriptsOnlyBuild:
     className: AspectRatioFitter
   - hash:
       serializedVersion: 2
-      Hash: 7209cf4d3b97db8864fc9256cb3c079a
+      Hash: 481a146674b01bc5abbf371f19e150ac
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: PlayFabManager
@@ -782,6 +782,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
     className: TextContainer
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Firebase.Platform.dll
+    namespaceName: Firebase.Platform
+    className: FirebaseMonoBehaviour
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
@@ -977,4 +983,4 @@ ScriptsOnlyBuild:
   platform: 13
   scenePathNames:
   - Assets/Scenes/Flappy Bird.unity
-  playerPath: C:/Users/ASUS/Documents/Zebedee/Zebedee/GitLab/FlappySats/flappy-sats/FlappySatsObfuscator.apk
+  playerPath: /Users/chris/Downloads/fs.aab

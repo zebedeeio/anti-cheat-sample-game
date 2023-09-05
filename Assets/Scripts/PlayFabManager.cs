@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using Beebyte.Obfuscator;
+using Firebase.AppCheck;
+using Firebase.Extensions;
 using MiniJSON;
 using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class PlayFabManager : MonoBehaviour
@@ -15,6 +19,8 @@ public class PlayFabManager : MonoBehaviour
     [Header("PlayFab Configuration")]
 
     public static PlayFabManager Instance;
+
+    public string userPlayfabId;
     public string titleId;
     [Header("Player Score")]
 
@@ -42,7 +48,7 @@ public class PlayFabManager : MonoBehaviour
     [Header("Withdraw Button")]
     public Button WithdrawButton;
 
-
+    private string appCheckToken;
     private int maxEarnScore = 0;
     private void Awake()
     {
@@ -59,22 +65,89 @@ public class PlayFabManager : MonoBehaviour
 
         }
 
+        FirebaseAppCheck.SetAppCheckProviderFactory(PlayIntegrityProviderFactory.Instance);
+
+
+
         Login();
 
+    }
+
+    void GetAppCheckToken()
+    {
+        Debug.Log("device check start1");
+        FirebaseAppCheck.DefaultInstance.GetAppCheckTokenAsync(true).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("device check s Failed to get the App Check token: " + task.Exception);
+                appCheckToken = "error";
+
+            }
+            else
+            {
+
+                var token = task.Result;
+                appCheckToken = token.Token;
+                Debug.Log("device check App Check Token: " + token.Token);
+            }
+
+            StartCoroutine(VerifyUser());
+
+        });
     }
     private void Login()
     {
         var request = new LoginWithCustomIDRequest { CustomId = SystemInfo.deviceUniqueIdentifier, CreateAccount = true };
         PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFailure);
+
     }
     private void OnLoginFailure(PlayFabError error)
     {
         Debug.LogWarning("Failed to log in to PlayFab. Error: " + error.GenerateErrorReport());
     }
 
+
+    [System.Serializable]
+    public class DataObject
+    {
+        public string appCheckToken;
+        public string playFabId;
+    }
+    private IEnumerator VerifyUser()
+    {
+        DataObject data = new DataObject();
+        data.appCheckToken = appCheckToken;
+        data.playFabId = userPlayfabId;
+
+
+        string jsonData = JsonUtility.ToJson(data);
+        UnityWebRequest www = new UnityWebRequest("https://anticheat-example-server-5c67778cdc0e.herokuapp.com/verify-app-check-token", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+        www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        www.downloadHandler = new DownloadHandlerBuffer();
+        www.SetRequestHeader("Content-Type", "application/json");
+
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error sending POST: " + www.error);
+        }
+        else
+        {
+            Debug.Log("POST successful! Response:\n" + www.downloadHandler.text);
+        }
+
+
+    }
+
+
     private void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Successfully logged in to PlayFab.");
+        userPlayfabId = result.PlayFabId;
+
 
         var request = new ExecuteCloudScriptRequest
         {
@@ -85,6 +158,28 @@ public class PlayFabManager : MonoBehaviour
         };
 
         PlayFabClientAPI.ExecuteCloudScript(request, OnCloudScriptSuccess, OnCloudScriptFailure);
+
+        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
+        {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == Firebase.DependencyStatus.Available)
+            {
+                Debug.Log("Device check0");
+                GetAppCheckToken();
+
+
+
+            }
+            else
+            {
+                UnityEngine.Debug.LogError(System.String.Format(
+                  "Superscale-Firebase: Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+                // Firebase Unity SDK is not safe to use here.
+            }
+        });
+
+
+
 
     }
     private void OnCloudScriptSuccess(ExecuteCloudScriptResult result)
