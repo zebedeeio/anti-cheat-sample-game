@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -65,7 +66,14 @@ public class PlayFabManager : MonoBehaviour
 
         }
 
-        FirebaseAppCheck.SetAppCheckProviderFactory(PlayIntegrityProviderFactory.Instance);
+        try
+        {
+            FirebaseAppCheck.SetAppCheckProviderFactory(PlayIntegrityProviderFactory.Instance);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e);
+        }
 
 
 
