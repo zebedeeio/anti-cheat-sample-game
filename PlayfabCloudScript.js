@@ -2,280 +2,303 @@
 
 var MAX_EARN_SCORE = 3;
 
-handlers.GetEarnModeScore = function (args, context) {
-  return { earnModeScore: MAX_EARN_SCORE };
+handlers.GetEarnModeScore = function(args, context)
+{
+    return { earnModeScore: MAX_EARN_SCORE };
 };
 
 function addPoints(points) {
-  var addResult = server.AddUserVirtualCurrency({
-    PlayFabId: currentPlayerId,
-    VirtualCurrency: "OB",
-    Amount: points,
-  });
+    var addResult = server.AddUserVirtualCurrency({
+        PlayFabId: currentPlayerId,
+        VirtualCurrency: "OB",
+        Amount: points
+    });
 
-  return addResult;
+    return addResult;
 }
 
-handlers.avoidobstacles = function (args, context) {
-  var addResult = addPoints(1);
-  var request = {
-    PlayFabId: currentPlayerId,
-    Statistics: [
-      {
-        StatisticName: "PlayerHighScore",
-        Value: 1,
-      },
-    ],
-  };
+handlers.avoidobstacles = function(args, context) {
+    var addResult = addPoints(1);
+    var request = {
+        PlayFabId: currentPlayerId,
+        Statistics: [{
+            StatisticName: "PlayerHighScore",
+            Value: 1
+        }]
+    };
 
-  var result = server.UpdatePlayerStatistics(request);
+    var result = server.UpdatePlayerStatistics(request);
 
-  return {
-    type: "avoidobstacles",
-    success: true,
-    data: addResult.Balance,
-  };
+    return {
+        type: "avoidobstacles",
+        success: true,
+        data: addResult.Balance
+    };
 };
 
-handlers.updateAndRetrieveScore = function (args, context) {
-  var payload = args.payload;
 
-  var encryptionKey =
-    "foDInDdhnrOHdR3hqHq0VpXQx3TseqBW92qudWOqY7s=.KppBTEAIEijkfugnAe/5H1LsyXIKiiH55ABqVU7kCuY=";
-  var receivedNonce = decrypt(payload, encryptionKey);
 
-  if (!receivedNonce) {
-    log.error("Nonce not provided.");
-    throw "Nonce is required.";
-  }
 
-  // Fetch the player's current nonce and the "cheated" flag from their data
-  var playerData = server.GetUserReadOnlyData({
-    PlayFabId: currentPlayerId,
-    Keys: ["nonce", "cheated"],
-  });
+function cleanUpOldNonces (currentPlayerId) {
+    // Retrieve all nonce data for the user
+    var userData = server.GetUserInternalData({
+        PlayFabId: currentPlayerId
+    });
 
-  var existingNonce = playerData.Data.nonce
-    ? playerData.Data.nonce.Value
-    : null;
-  // Initialize the flag to false
-  var cheatedFlag = false;
+    var currentTime = new Date();
+    var expirationTime =  60000;
 
-  // Check if the 'cheated' key exists in the data and if its value is 'true'
-  if (
-    playerData.Data.hasOwnProperty("cheated") &&
-    playerData.Data.cheated.Value === "true"
-  ) {
-    cheatedFlag = true;
-  }
+    var keysToDelete = [];
 
-  if (cheatedFlag === true) {
-    return { error: true, message: "Please contact support" };
-  }
+    for (var key in userData.Data) {
+        if (key.startsWith("nonce")) {
+            var storedTime = new Date(userData.Data[key].Value);
+            var timeDifference = currentTime - storedTime;
 
-  // If the existing nonce matches the received nonce, consider it a replay attack
-  if (existingNonce === receivedNonce) {
-    cheatedFlag = true; // Update the "cheated" flag
-  } else {
-    // Otherwise, update the nonce with the received nonce
-    existingNonce = receivedNonce;
-  }
-
-  // Save the updated nonce and "cheated" flag back to the player's data
-  server.UpdateUserReadOnlyData({
-    PlayFabId: currentPlayerId,
-    Data: {
-      nonce: existingNonce,
-      cheated: cheatedFlag,
-    },
-  });
-
-  if (cheatedFlag === true) {
-    return { error: true, message: "Please contact support" };
-  }
-
-  var increaseAmount = 1; // Increase score by 1 for each obstacle avoided
-
-  // Retrieve the player's current score from the internal data
-  var internalDataResult = server.GetUserInternalData({
-    PlayFabId: currentPlayerId,
-    Keys: ["Score", "HighScore"],
-  });
-
-  var currentScore = 0;
-  if (internalDataResult.Data && internalDataResult.Data.Score) {
-    currentScore = parseInt(internalDataResult.Data.Score.Value);
-  }
-
-  // Increase the score by one
-  currentScore += increaseAmount;
-
-  var currentHighScore = currentScore;
-  if (internalDataResult.Data && internalDataResult.Data.HighScore) {
-    var storedHighScore = parseInt(internalDataResult.Data.HighScore.Value);
-    if (currentScore > storedHighScore) {
-      currentHighScore = currentScore;
-    } else {
-      currentHighScore = storedHighScore;
+            if (timeDifference > expirationTime && keysToDelete.length < 10) {
+                keysToDelete.push(key);
+            }
+        }
     }
-  }
 
-  // Update the player's score statistic
-  var updateStatResult = server.UpdatePlayerStatistics({
-    PlayFabId: currentPlayerId,
-    Statistics: [
-      {
-        StatisticName: "Score",
-        Value: currentScore,
-      },
-      {
-        StatisticName: "HighScore",
-        Value: currentHighScore,
-      },
-    ],
-  });
+    if (keysToDelete.length == 10) {
+        server.UpdateUserInternalData({
+            PlayFabId: currentPlayerId,
+            KeysToRemove: keysToDelete
+        });
+    }
 
-  // Update the player's internal data with the new score and high score
-  server.UpdateUserInternalData({
-    PlayFabId: currentPlayerId,
-    Data: {
-      Score: currentScore.toString(),
-      HighScore: currentHighScore.toString(),
-    },
-  });
+    return { cleanedKeys: keysToDelete.length };
+};
 
-  // Return the updated score and high score to Unity
-  return { score: currentScore, highScore: currentHighScore };
+
+handlers.updateAndRetrieveScore = function (args, context) {
+    
+    var payload = args.payload;
+
+    var encryptionKey = "tJpXSRh61cBfZeEW88eTDi427x9AINYtCMwcGunpFbM=.tqfIBannD8dfcGQWjfmeIrIt/ThYZAK++aI+drTqOtc=";
+    var receivedNonce = "nonce"+decrypt(payload, encryptionKey);
+    
+    if (!receivedNonce) {
+      log.error("Nonce not provided.");
+      throw "Nonce is required.";
+    }
+    
+    cleanUpOldNonces(currentPlayerId);
+      
+    var currentTime = new Date().toISOString();
+
+       // Fetch the player's current nonce and the "cheated" flag from their data
+    var playerData = server.GetUserInternalData({
+        PlayFabId: currentPlayerId,
+        Keys: [receivedNonce, "cheated"]
+    });
+
+
+    // Initialize the flag to false
+    var cheatedFlag = false;
+
+    // Check if the 'cheated' key exists in the data and if its value is 'true'
+    if (playerData.Data.hasOwnProperty('cheated') && playerData.Data.cheated.Value === "true") {
+        cheatedFlag = true;
+    }
+    
+    
+    if(cheatedFlag === true){
+       return { error:true, message:"Please contact support"};
+    }
+    
+    if (playerData.Data && playerData.Data[receivedNonce]) {
+        cheatedFlag = true;
+    }
+
+    // Save the updated nonce and "cheated" flag back to the player's data
+    server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            [receivedNonce]: currentTime,
+            cheated: cheatedFlag
+        }
+    });
+     
+    if(cheatedFlag === true){
+       return { error:true, message:"Please contact support"};
+    }
+     
+    var increaseAmount = 1; // Increase score by 1 for each obstacle avoided
+
+    // Retrieve the player's current score from the internal data
+    var internalDataResult = server.GetUserInternalData({
+        PlayFabId: currentPlayerId,
+        Keys: ["Score", "HighScore"]
+    });
+
+    var currentScore = 0;
+    if (internalDataResult.Data && internalDataResult.Data.Score) {
+        currentScore = parseInt(internalDataResult.Data.Score.Value);
+    }
+
+    // Increase the score by one
+    currentScore += increaseAmount;
+
+    var currentHighScore = currentScore;
+    if (internalDataResult.Data && internalDataResult.Data.HighScore) {
+        var storedHighScore = parseInt(internalDataResult.Data.HighScore.Value);
+        if (currentScore > storedHighScore) {
+            currentHighScore = currentScore;
+        } else {
+            currentHighScore = storedHighScore;
+        }
+    }
+
+    // Update the player's score statistic
+    var updateStatResult = server.UpdatePlayerStatistics({
+        PlayFabId: currentPlayerId,
+        Statistics: [
+            {
+                StatisticName: "Score",
+                Value: currentScore
+            },
+            {
+                StatisticName: "HighScore",
+                Value: currentHighScore
+            }
+        ]
+    });
+
+    // Update the player's internal data with the new score and high score
+    server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            Score: currentScore.toString(),
+            HighScore: currentHighScore.toString()
+        }
+    });
+
+    // Return the updated score and high score to Unity
+    return { score: currentScore, highScore: currentHighScore };
 };
 
 handlers.resetScore = function (args, context) {
-  var updateStatResult = server.UpdatePlayerStatistics({
-    PlayFabId: currentPlayerId,
-    Statistics: [
-      {
-        StatisticName: "Score",
-        Value: 0,
-      },
-    ],
-  });
+    var updateStatResult = server.UpdatePlayerStatistics({
+        PlayFabId: currentPlayerId,
+        Statistics: [
+            {
+                StatisticName: "Score",
+                Value: 0
+            }
+        ]
+    });
 
-  server.UpdateUserInternalData({
-    PlayFabId: currentPlayerId,
-    Data: {
-      Score: "0",
-    },
-  });
+    server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            Score: "0"
+        }
+    });
 
-  var response = {
-    score: 0,
-  };
+    var response = {
+        score: 0
+    };
 
-  return JSON.stringify(response);
+    return JSON.stringify(response);
 };
 
+
+
+
 handlers.SaveGamertag = function (args, context) {
-  var gamertag = args.gamertag; // Retrieve the gamertag from the function parameter
+    var gamertag = args.gamertag; // Retrieve the gamertag from the function parameter
 
-  // Save the gamertag in player internal data (title data)
-  var updateInternalDataResult = server.UpdateUserInternalData({
-    PlayFabId: currentPlayerId,
-    Data: {
-      Gamertag: gamertag,
-    },
-  });
+    // Save the gamertag in player internal data (title data)
+    var updateInternalDataResult = server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            Gamertag: gamertag
+        }
+    });
 
-  // Retrieve the player's score from the player internal data (title data)
-  var internalData = server.GetUserInternalData({
-    PlayFabId: currentPlayerId,
-    Keys: ["Score"],
-  });
+    // Retrieve the player's score from the player internal data (title data)
+    var internalData = server.GetUserInternalData({
+        PlayFabId: currentPlayerId,
+        Keys: ["Score"]
+    });
 
-  var score = 0;
-  if (internalData.Data && internalData.Data.Score) {
-    score = parseInt(internalData.Data.Score.Value);
-  } else {
-    // Score data not available
+    var score = 0;
+    if (internalData.Data && internalData.Data.Score) {
+        score = parseInt(internalData.Data.Score.Value);
+    } else {
+        // Score data not available
+        var response = {
+            success: false,
+            reason: "Score data not found."
+        };
+
+        // Return the response object
+        return response;
+    }
+
+    // Save the score as the withdraw amount in player internal data (title data)
+    var updateInternalDataResult = server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            WithdrawAmount: score.toString()
+        }
+    });
+
+    // Send payment to the API and get the response
+    var paymentResponse = sendPaymentToAPI(score, "Sending to ZBD Gamertag", gamertag);
+
+    if (!paymentResponse.success) {
+        // Payment failed, return the response object
+        return paymentResponse;
+    }
+
+    // Response object for successful gamertag save
     var response = {
-      success: false,
-      reason: "Score data not found.",
+        success: true,
+        reason: "Gamertag saved successfully."
     };
 
     // Return the response object
     return response;
-  }
-
-  // Save the score as the withdraw amount in player internal data (title data)
-  var updateInternalDataResult = server.UpdateUserInternalData({
-    PlayFabId: currentPlayerId,
-    Data: {
-      WithdrawAmount: score.toString(),
-    },
-  });
-
-  // Send payment to the API and get the response
-  var paymentResponse = sendPaymentToAPI(
-    score,
-    "Sending to ZBD Gamertag",
-    gamertag
-  );
-
-  if (!paymentResponse.success) {
-    // Payment failed, return the response object
-    return paymentResponse;
-  }
-
-  // Response object for successful gamertag save
-  var response = {
-    success: true,
-    reason: "Gamertag saved successfully.",
-  };
-
-  // Return the response object
-  return response;
 };
 
+
 function sendPaymentToAPI(amount, description, gamertag) {
-  try {
-    var apiKey = "w3IOKzoD62rnwqWt1xXnmKIXtknqJENb";
-    var url = "https://api.zebedee.io/v0/gamertag/send-payment";
-    var httpMethod = "post";
-    var contentType = "application/json";
-    var headers = {
-      "Content-Type": contentType,
-      apikey: apiKey,
-    };
+    try {
+      
+        var apiKey = "w3IOKzoD62rnwqWt1xXnmKIXtknqJENb";
+        var url = "https://api.zebedee.io/v0/gamertag/send-payment";
+        var httpMethod = "post";
+        var contentType = "application/json";
+        var headers = {
+            "Content-Type": contentType,
+            "apikey": apiKey
+        };
 
-    var amountInAPIUnits = amount * 1000;
-    var requestBody = {
-      amount: amountInAPIUnits.toString(),
-      description: description,
-      gamertag: gamertag,
-    };
-    var requestBodyString = JSON.stringify(requestBody);
+        var amountInAPIUnits = amount * 1000;
+        var requestBody = {
+            amount: amountInAPIUnits.toString(),
+            description: description,
+            gamertag: gamertag
+        };
+        var requestBodyString = JSON.stringify(requestBody);
 
-    // Make the POST request
-    var response = http.request(
-      url,
-      httpMethod,
-      requestBodyString,
-      contentType,
-      headers
-    );
+        // Make the POST request
+        var response = http.request(url, httpMethod, requestBodyString, contentType, headers);
 
-    var responseObject = JSON.parse(response);
+        var responseObject = JSON.parse(response);
 
-    if (responseObject.success === true) {
-      // Return the response object indicating success
-      return { success: true, reason: responseObject.reason };
-    } else {
-      // Return the response object indicating failure
-      return { success: false, reason: "Failed to send payment." };
+       if (responseObject.success === true) {
+            // Return the response object indicating success
+            return { success: true, reason: responseObject.reason };
+        } else {
+            // Return the response object indicating failure
+            return { success: false, reason: "Failed to send payment."};
+        }
+    } catch (error) {
+        // Return the response object indicating error
+        return { success: false, reason: "An error occurred while sending the payment."};
     }
-  } catch (error) {
-    // Return the response object indicating error
-    return {
-      success: false,
-      reason: "An error occurred while sending the payment.",
-    };
-  }
 }
